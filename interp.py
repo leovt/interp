@@ -147,8 +147,9 @@ def execute(code, globals):
         else:
             raise Exception('Unknown Opcode %d (%s)' % (bc, dis.opname[bc]))
 
-print 'normal Python call:', test()
-print 'own execute function:', execute(test.func_code, test.func_globals)
+if __name__ == '__main__':
+    print 'normal Python call:', test()
+    print 'own execute function:', execute(test.func_code, test.func_globals)
         
         
         
