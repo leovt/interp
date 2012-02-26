@@ -3,8 +3,10 @@
 # Redistribution of this code and use in derivative works are permitted.
 
 def test():
-    for i in range(10):
-        print i
+    return square(4) + square(3)
+
+def square(n):
+    return n * n
 
 # define constants for the byte-codes
 import dis
@@ -30,18 +32,21 @@ PRINT_NEWLINE = dis.opmap['PRINT_NEWLINE']
 import types
 
 class Frame(object):
-    def __init__(self, code, globals):
+    def __init__(self, code, globals, caller):
         self.locals = [None] * code.co_nlocals
         self.PC = 0
         self.stack = []
         self.globals = globals
         self.code = code
+        self.caller = caller
 
 def execute(code, globals):
-    f = Frame(code, globals)
+    f = Frame(code, globals, None)
 
     while True:
         bc = ord(f.code.co_code[f.PC])
+
+        #print f.PC, dis.opname[bc], f.stack, f.locals
         
         if bc==LOAD_FAST:
             arg = ord(f.code.co_code[f.PC+1]) + 256*ord(f.code.co_code[f.PC+2])
@@ -82,7 +87,12 @@ def execute(code, globals):
             f.PC += 3
 
         elif bc==RETURN_VALUE:
-            return f.stack.pop()
+            if f.caller is None:
+                return f.stack.pop()
+            else:
+                ret = f.stack.pop()
+                f = f.caller
+                f.stack.append(ret)
 
         elif bc==SETUP_LOOP:
             f.PC += 3
@@ -109,6 +119,11 @@ def execute(code, globals):
             if type(callee) is types.BuiltinFunctionType:
                 f.stack.append(callee(*call_args))
                 f.PC += 3
+            elif type(callee) is types.FunctionType:
+                subframe = Frame(callee.func_code, callee.func_globals, f)
+                subframe.locals[:arg] = call_args
+                f.PC += 3
+                f = subframe
 
         elif bc==FOR_ITER:
             arg = ord(f.code.co_code[f.PC+1]) + 256*ord(f.code.co_code[f.PC+2])
@@ -133,8 +148,7 @@ def execute(code, globals):
             raise Exception('Unknown Opcode %d (%s)' % (bc, dis.opname[bc]))
 
 print 'normal Python call:', test()
-my_globals = {'range': range}
-print 'own execute function:', execute(test.func_code, my_globals)
+print 'own execute function:', execute(test.func_code, test.func_globals)
         
         
         
