@@ -1,0 +1,6 @@
+This repository stores the code I write about in my blog
+leovt.wordpress.com
+
+At the moment this is an interpreter for Python bytecode I
+write in Python.
+Its purpose is to try and find out how Python works.
