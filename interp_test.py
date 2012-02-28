@@ -21,5 +21,21 @@ class TestRetrunValues(unittest.TestCase):
 
         self.assertEqual(expected, realized)
 
+    def test_loop(self):
+        """
+        Testing a for loop. In addition to printing build a checksum
+        so that we can test a meaningful return value.
+        """
+        def test():
+            ret = 0
+            for i in range(10):
+                print i
+                ret = ret + i
+            return ret
+        
+        expected = test()
+        realized = interp.execute(test.func_code, {'range': range})
+
+
 if __name__ == '__main__':
     unittest.main()
