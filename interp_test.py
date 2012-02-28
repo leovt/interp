@@ -36,6 +36,19 @@ class TestRetrunValues(unittest.TestCase):
         expected = test()
         realized = interp.execute(test.func_code, {'range': range})
 
+    @unittest.skip('closures (e.g. LOAD_DEREF) not yet implemented')
+    def test_call(self):
+        """
+        test from third post: calling a function
+        """
+        def test():
+            return square(4) + square(3)
+
+        def square(n):
+            return n * n
+
+        expected = test()
+        realized = interp.execute(test.func_code, test.func_globals)
 
 if __name__ == '__main__':
     unittest.main()
