@@ -66,20 +66,20 @@ def execute(code, globs):
     while True:
         bc = ord(f.code.co_code[f.pc])
 
+        if bc >= opcode.HAVE_ARGUMENT:
+            # this bytecode takes an argument
+            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
         #print f.pc, opcode.opname[bc], f.stack, f.locals
         
         if bc == LOAD_FAST:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             f.stack.append(f.locals[arg])
             f.pc += 3
 
         elif bc == LOAD_CONST:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             f.stack.append(f.code.co_consts[arg])
             f.pc += 3
 
         elif bc == LOAD_GLOBAL:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             f.stack.append(f.globs[f.code.co_names[arg]])
             f.pc += 3            
 
@@ -102,7 +102,6 @@ def execute(code, globs):
             f.pc += 1
 
         elif bc == STORE_FAST:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             f.locals[arg] = f.stack.pop()
             f.pc += 3
 
@@ -125,13 +124,12 @@ def execute(code, globs):
             f.pc += 1
 
         elif bc == JUMP_ABSOLUTE:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             f.pc = arg
 
         elif bc == CALL_FUNCTION:
-            arg = ord(f.code.co_code[f.pc+1])
+            nb_kwargs, nb_args = divmod(arg, 256)
 
-            call_args = [None] * arg
+            call_args = [None] * nb_args
             for i in range(arg-1, -1, -1):
                 call_args[i] = f.stack.pop()
             
@@ -141,12 +139,11 @@ def execute(code, globs):
                 f.pc += 3
             elif type(callee) is types.FunctionType:
                 subframe = Frame(callee.func_code, callee.func_globals, f)
-                subframe.locals[:arg] = call_args
+                subframe.locals[:nb_args] = call_args
                 f.pc += 3
                 f = subframe
 
         elif bc == FOR_ITER:
-            arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
             try:
                 nx = next(f.stack[-1])
             except StopIteration:
