@@ -8,25 +8,25 @@ http://leovt.wordpress.com
 """
 
 # define constants for the byte-codes
-import dis
-LOAD_CONST = dis.opmap['LOAD_CONST']
-LOAD_FAST = dis.opmap['LOAD_FAST']
-LOAD_GLOBAL = dis.opmap['LOAD_GLOBAL']
-STORE_FAST = dis.opmap['STORE_FAST']
-RETURN_VALUE = dis.opmap['RETURN_VALUE']
-BINARY_ADD = dis.opmap['BINARY_ADD']
-BINARY_SUBTRACT = dis.opmap['BINARY_SUBTRACT']
-BINARY_MULTIPLY = dis.opmap['BINARY_MULTIPLY']
-CALL_FUNCTION = dis.opmap['CALL_FUNCTION']
+import opcode
+LOAD_CONST = opcode.opmap['LOAD_CONST']
+LOAD_FAST = opcode.opmap['LOAD_FAST']
+LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
+STORE_FAST = opcode.opmap['STORE_FAST']
+RETURN_VALUE = opcode.opmap['RETURN_VALUE']
+BINARY_ADD = opcode.opmap['BINARY_ADD']
+BINARY_SUBTRACT = opcode.opmap['BINARY_SUBTRACT']
+BINARY_MULTIPLY = opcode.opmap['BINARY_MULTIPLY']
+CALL_FUNCTION = opcode.opmap['CALL_FUNCTION']
 
-SETUP_LOOP = dis.opmap['SETUP_LOOP']
-POP_BLOCK = dis.opmap['POP_BLOCK']
-GET_ITER = dis.opmap['GET_ITER']
-FOR_ITER = dis.opmap['FOR_ITER']
-JUMP_ABSOLUTE = dis.opmap['JUMP_ABSOLUTE']
+SETUP_LOOP = opcode.opmap['SETUP_LOOP']
+POP_BLOCK = opcode.opmap['POP_BLOCK']
+GET_ITER = opcode.opmap['GET_ITER']
+FOR_ITER = opcode.opmap['FOR_ITER']
+JUMP_ABSOLUTE = opcode.opmap['JUMP_ABSOLUTE']
 
-PRINT_ITEM = dis.opmap['PRINT_ITEM']
-PRINT_NEWLINE = dis.opmap['PRINT_NEWLINE']
+PRINT_ITEM = opcode.opmap['PRINT_ITEM']
+PRINT_NEWLINE = opcode.opmap['PRINT_NEWLINE']
 
 import types
 
@@ -66,7 +66,7 @@ def execute(code, globs):
     while True:
         bc = ord(f.code.co_code[f.pc])
 
-        #print f.pc, dis.opname[bc], f.stack, f.locals
+        #print f.pc, opcode.opname[bc], f.stack, f.locals
         
         if bc == LOAD_FAST:
             arg = ord(f.code.co_code[f.pc+1]) + 256*ord(f.code.co_code[f.pc+2])
@@ -165,7 +165,7 @@ def execute(code, globs):
             f.pc += 1
 
         else:
-            raise Exception('Unknown Opcode %d (%s)' % (bc, dis.opname[bc]))
+            raise Exception('Unknown Opcode %d (%s)' % (bc, opcode.opname[bc]))
 
 
         
