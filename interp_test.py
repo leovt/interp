@@ -29,7 +29,6 @@ class TestRetrunValues(unittest.TestCase):
 
         expected = test()
         realized = interp.execute(test.func_code, {})
-
         self.assertEqual(expected, realized)
 
     def test_loop(self):
@@ -46,6 +45,7 @@ class TestRetrunValues(unittest.TestCase):
         
         expected = test()
         realized = interp.execute(test.func_code, {'range': range})
+        self.assertEqual(expected, realized)
 
     @unittest.skip('closures (e.g. LOAD_DEREF) not yet implemented')
     def test_call(self):
@@ -60,7 +60,6 @@ class TestRetrunValues(unittest.TestCase):
 
         expected = test()
         realized = interp.execute(test.func_code, test.func_globals)
-
         self.assertEqual(expected, realized)
 
 
@@ -71,10 +70,28 @@ class TestRetrunValues(unittest.TestCase):
         test = _call_global
         expected = test()
         realized = interp.execute(test.func_code, test.func_globals)
-
         self.assertEqual(expected, realized)
+
+    
+    def test_attribute_builtin(self):
+        '''
+        access and execute attributes
+        '''
+        def test():
+            x = 'abc'.upper()
+            a = [3,1,2]
+            a.sort()
+            return a, x
+        
+        expected = test()
+        realized = interp.execute(test.func_code, test.func_globals)
+        self.assertEqual(expected, realized)
+       
         
 
+            
+            
+        
 
 if __name__ == '__main__':
     unittest.main()

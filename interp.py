@@ -12,6 +12,7 @@ import opcode
 LOAD_CONST = opcode.opmap['LOAD_CONST']
 LOAD_FAST = opcode.opmap['LOAD_FAST']
 LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
+LOAD_ATTR = opcode.opmap['LOAD_ATTR']
 STORE_FAST = opcode.opmap['STORE_FAST']
 RETURN_VALUE = opcode.opmap['RETURN_VALUE']
 BINARY_ADD = opcode.opmap['BINARY_ADD']
@@ -27,6 +28,12 @@ JUMP_ABSOLUTE = opcode.opmap['JUMP_ABSOLUTE']
 
 PRINT_ITEM = opcode.opmap['PRINT_ITEM']
 PRINT_NEWLINE = opcode.opmap['PRINT_NEWLINE']
+
+BUILD_LIST = opcode.opmap['BUILD_LIST']
+BUILD_TUPLE = opcode.opmap['BUILD_TUPLE']
+
+POP_TOP = opcode.opmap['POP_TOP']
+
 
 import types
 
@@ -81,6 +88,10 @@ def execute(code, globs):
 
         elif bc == LOAD_GLOBAL:
             f.stack.append(f.globs[f.code.co_names[arg]])
+            f.pc += 3            
+
+        elif bc == LOAD_ATTR:
+            f.stack.append(getattr(f.stack.pop(), f.code.co_names[arg]))
             f.pc += 3            
 
         elif bc == BINARY_ADD:
@@ -159,6 +170,22 @@ def execute(code, globs):
 
         elif bc == PRINT_NEWLINE:
             print
+            f.pc += 1
+
+        elif bc == BUILD_LIST:
+            lst = list(f.stack[-arg:])
+            f.stack[-arg:] = []
+            f.stack.append(lst)
+            f.pc += 3
+
+        elif bc == BUILD_TUPLE:
+            tup = tuple(f.stack[-arg:])
+            f.stack[-arg:] = []
+            f.stack.append(tup)
+            f.pc += 3
+
+        elif bc == POP_TOP:
+            f.stack.pop()
             f.pc += 1
 
         else:
