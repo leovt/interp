@@ -1,17 +1,6 @@
 import unittest
 import interp
 
-def _call_global():
-    '''
-    A test function for the following unittest. 
-    Must be defined in module level
-    '''
-    return _square(4) + _square(3)
-
-def _square(n):
-    return n * n
-
-
 class TestRetrunValues(unittest.TestCase):
     """
     These tests are verifying that the return values
@@ -67,7 +56,13 @@ class TestRetrunValues(unittest.TestCase):
         """
         test from third post: calling a function, at module level
         """
-        test = _call_global
+        global square
+        def test():
+            return square(4) + square(3)
+
+        def square(n):
+            return n * n
+
         expected = test()
         realized = interp.execute(test.func_code, test.func_globals)
         self.assertEqual(expected, realized)
@@ -86,12 +81,7 @@ class TestRetrunValues(unittest.TestCase):
         expected = test()
         realized = interp.execute(test.func_code, test.func_globals)
         self.assertEqual(expected, realized)
-       
-        
 
-            
-            
-        
 
 if __name__ == '__main__':
     unittest.main()
