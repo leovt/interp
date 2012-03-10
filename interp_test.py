@@ -1,7 +1,7 @@
 import unittest
 import interp
 
-class TestRetrunValues(unittest.TestCase):
+class TestReturnValues(unittest.TestCase):
     """
     These tests are verifying that the return values
     of some functions are the same in native Python and
@@ -81,6 +81,20 @@ class TestRetrunValues(unittest.TestCase):
         expected = test()
         realized = interp.execute(test.func_code, test.func_globals)
         self.assertEqual(expected, realized)
+
+    def test_jump_or_pop(self):
+        '''
+        test the two instructions JUMP_IF_FALSE_OR_POP, JUMP_IF_TRUE_OR_POP
+        '''
+        def test():
+            return ('abc' or None, 
+                    '' or 1, 
+                    [] and 4, 
+                    (3,) and '123')
+        expected = test()
+        realized = interp.execute(test.func_code, test.func_globals)
+        self.assertEqual(expected, realized)
+
 
 
 if __name__ == '__main__':
