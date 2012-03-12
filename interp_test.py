@@ -95,7 +95,57 @@ class TestReturnValues(unittest.TestCase):
         realized = interp.execute(test.func_code, test.func_globals)
         self.assertEqual(expected, realized)
 
+    def test_pop_jump(self):
+        global helper
 
+        def helper(a,b):
+            if a:
+                if not b:
+                    return 1
+                else:
+                    return 2
+            else:
+                return 3
 
+        def test():
+            return helper(1,0), helper(1,1), helper(0,1)
+
+        expected = test()
+        realized = interp.execute(test.func_code, test.func_globals)
+        self.assertEqual(expected, realized)
+
+    def test_jump_forward(self):
+        def test():
+            if True:
+                ret = 'yes'
+            else:
+                ret = 'no'
+            return ret
+        expected = test()
+        realized = interp.execute(test.func_code, {'True': True})
+        self.assertEqual(expected, realized)
+
+    def test_unknown_opcode(self):
+        class Mock(object):
+            co_code = '\xff\x00\x00'
+            co_nlocals = 0
+
+        with self.assertRaises(interp.InterpError):
+            interp.execute(Mock(), {})
+
+    def test_corrupt_stack(self):
+        from interp import LOAD_CONST, RETURN_VALUE
+        class Mock(object):
+            co_code = ''.join(map(chr, [
+                        LOAD_CONST, 0,0,
+                        LOAD_CONST, 0,0,
+                        RETURN_VALUE]))
+            co_nlocals = 0
+            co_consts = (None,)
+
+        with self.assertRaises(interp.InterpError):
+            interp.execute(Mock(), {})
+
+        
 if __name__ == '__main__':
     unittest.main()

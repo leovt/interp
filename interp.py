@@ -40,6 +40,11 @@ BUILD_TUPLE = opcode.opmap['BUILD_TUPLE']
 
 POP_TOP = opcode.opmap['POP_TOP']
 
+class InterpError(Exception):
+    '''
+    raised when something is wrong with the bytecode
+    or the interpreter state
+    '''
 
 import types
 
@@ -126,10 +131,12 @@ def execute(code, globs):
             f.pc += 3
 
         elif bc == RETURN_VALUE:
+            ret = f.stack.pop()
+            if f.stack:
+                raise InterpError('stack not empty on return')
             if f.caller is None:
-                return f.stack.pop()
+                return ret
             else:
-                ret = f.stack.pop()
                 f = f.caller
                 f.stack.append(ret)
 
@@ -146,6 +153,9 @@ def execute(code, globs):
         elif bc == JUMP_ABSOLUTE:
             f.pc = arg
 
+        elif bc == JUMP_FORWARD:
+            f.pc += arg + 3
+
         elif bc == JUMP_IF_FALSE_OR_POP:
             if f.stack[-1]:
                 f.stack.pop()
@@ -158,6 +168,18 @@ def execute(code, globs):
                 f.pc = arg
             else:
                 f.stack.pop()
+                f.pc += 3
+
+        elif bc == POP_JUMP_IF_FALSE:
+            if f.stack.pop():
+                f.pc += 3
+            else:
+                f.pc = arg
+
+        elif bc == POP_JUMP_IF_TRUE:
+            if f.stack.pop():
+                f.pc = arg
+            else:
                 f.pc += 3
 
         elif bc == CALL_FUNCTION:
@@ -215,7 +237,7 @@ def execute(code, globs):
             f.pc += 1
 
         else:
-            raise Exception('Unknown Opcode %d (%s)' % (bc, opcode.opname[bc]))
+            raise InterpError('Unknown Opcode %d (%s)' % (bc, opcode.opname[bc]))
 
 
         
