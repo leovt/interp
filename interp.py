@@ -20,6 +20,8 @@ BINARY_SUBTRACT = opcode.opmap['BINARY_SUBTRACT']
 BINARY_MULTIPLY = opcode.opmap['BINARY_MULTIPLY']
 CALL_FUNCTION = opcode.opmap['CALL_FUNCTION']
 
+COMPARE_OP = opcode.opmap['COMPARE_OP']
+
 SETUP_LOOP = opcode.opmap['SETUP_LOOP']
 POP_BLOCK = opcode.opmap['POP_BLOCK']
 GET_ITER = opcode.opmap['GET_ITER']
@@ -230,6 +232,33 @@ def execute(code, globs):
             tup = tuple(f.stack[-arg:])
             f.stack[-arg:] = []
             f.stack.append(tup)
+            f.pc += 3
+
+        elif bc == COMPARE_OP:
+            b = f.stack.pop()
+            a = f.stack.pop()
+            if arg == 0:
+                f.stack.append(a < b)
+            elif arg == 1:
+                f.stack.append(a <= b)
+            elif arg == 2:
+                f.stack.append(a == b)
+            elif arg == 3:
+                f.stack.append(a != b)
+            elif arg == 4:
+                f.stack.append(a > b)
+            elif arg == 5:
+                f.stack.append(a >= b)
+            elif arg == 6:
+                f.stack.append(a in b)
+            elif arg == 7:
+                f.stack.append(a not in b)
+            elif arg == 8:
+                f.stack.append(a is b)
+            elif arg == 9:
+                f.stack.append(a is not b)
+            else:
+                raise InterpError('Unknown Compare operation %d' % arg)
             f.pc += 3
 
         elif bc == POP_TOP:

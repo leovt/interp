@@ -146,6 +146,37 @@ class TestReturnValues(unittest.TestCase):
         with self.assertRaises(interp.InterpError):
             interp.execute(Mock(), {})
 
+    def test_compare(self):
+        def test():
+            return (
+                1 < 2, 1 < 1, 2 < 1,
+                1 > 2, 1 > 1, 2 > 1,
+                1 == 2, 1 == 1, 2 == 1,
+                1 <= 2, 1 <= 1, 2 <= 1,
+                1 >= 2, 1 >= 1, 2 >= 1,
+                1 != 2, 1 != 1, 2 != 1,
+                1 is 2, 1 is 1, 2 is 1,
+                1 is not 2, 1 is not 1, 2 is not 1,
+                'a' in 'ab', 'a' in 'bc',
+                'a' not in 'ab', 'a' not in 'bc')
+    
+        expected = test()
+        realized = interp.execute(test.func_code, test.func_globals)
+        self.assertEqual(expected, realized)
+
+    def test_bad_compare_op(self):
+        from interp import LOAD_CONST, RETURN_VALUE, COMPARE_OP
+        class Mock(object):
+            co_code = ''.join(map(chr, [
+                        LOAD_CONST, 0,0,
+                        LOAD_CONST, 0,0,
+                        COMPARE_OP, 17,17,
+                        RETURN_VALUE]))
+            co_nlocals = 0
+            co_consts = (None,)
+
+        with self.assertRaises(interp.InterpError):
+            interp.execute(Mock(), {})
         
 if __name__ == '__main__':
     unittest.main()
